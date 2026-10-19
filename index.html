@@ -1,207 +1,61 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HTML ফাইল হোস্টিং প্ল্যাটফর্ম</title>
+    <title>My Hosting</title>
     <style>
-        * {
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
-        body {
-            background-color: #f4f6f9;
-            margin: 0;
-            padding: 40px 20px;
-            display: flex;
-            justify-content: center;
-        }
-        .container {
-            width: 100%;
-            max-width: 500px;
-            background: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-        h2 {
-            margin-top: 0;
-            color: #333;
-            text-align: center;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: #666;
-            font-weight: bold;
-        }
-        input[type="text"], input[type="password"], input[type="file"] {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: #007bff;
-            border: none;
-            color: #fff;
-            font-size: 16px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .hidden {
-            display: none;
-        }
-        .alert {
-            padding: 10px;
-            margin-top: 15px;
-            border-radius: 4px;
-            word-break: break-all;
-        }
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        a {
-            color: #007bff;
-            font-weight: bold;
-        }
+        body { font-family: sans-serif; background: #111; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .box { background: #222; padding: 30px; border-radius: 10px; width: 300px; text-align: center; }
+        input { width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; background: #333; border: 1px solid #555; color: white; border-radius: 5px; }
+        button { width: 100%; padding: 10px; background: #3b82f6; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+        button:hover { background: #2563eb; }
+        #result { margin-top: 15px; font-size: 14px; }
+        a { color: #3b82f6; word-break: break-all; }
     </style>
 </head>
 <body>
-
-<div class="container">
-    <h2>HTML হোস্টিং সার্ভিস</h2>
-
-    <!-- লগইন সেকশন -->
-    <div id="auth-section">
-        <h3>লগইন / একাউন্ট খুলুন</h3>
-        <form id="loginForm">
-            <div class="form-group">
-                <label>ইউজারনেম</label>
-                <input type="text" id="username" required placeholder="আপনার নাম লিখুন">
-            </div>
-            <div class="form-group">
-                <label>পাসওয়ার্ড</label>
-                <input type="password" id="password" required placeholder="পাসওয়ার্ড লিখুন">
-            </div>
-            <button type="submit">প্রবেশ করুন</button>
-        </form>
-    </div>
-
-    <!-- ফাইল আপলোড সেকশন -->
-    <div id="upload-section" class="hidden">
-        <p>স্বাগতম, <b id="user-display"></b>!</p>
-        <h3>আপনার HTML ফাইল আপলোড করুন</h3>
+    <div class="box">
+        <h2>Host Your Site</h2>
         <form id="uploadForm">
-            <div class="form-group">
-                <label>সাইটের সাব-পাথ/নাম (যেমন: my-portfolio)</label>
-                <input type="text" id="siteName" required placeholder="my-awesome-site">
-            </div>
-            <div class="form-group">
-                <label>HTML ফাইল সিলেক্ট করুন</label>
-                <input type="file" id="htmlFile" accept=".html,.htm" required>
-            </div>
-            <button type="submit">পাবলিশ করুন</button>
+            <input type="text" id="siteName" placeholder="Site Name (e.g. mypage)" required>
+            <input type="file" id="siteFile" accept=".html" required>
+            <button type="submit" id="submitBtn">Upload & Host</button>
         </form>
-
-        <button onclick="logout()" style="background-color: #dc3545; margin-top: 15px;">লগআউট</button>
+        <div id="result"></div>
     </div>
 
-    <div id="message" class="alert hidden"></div>
-</div>
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const result = document.getElementById('result');
+            const siteName = document.getElementById('siteName').value;
+            const file = document.getElementById('siteFile').files[0];
 
-<script>
-    let currentUser = null;
+            const formData = new FormData();
+            formData.append('siteName', siteName);
+            formData.append('siteFile', file);
 
-    const authSection = document.getElementById('auth-section');
-    const uploadSection = document.getElementById('upload-section');
-    const messageDiv = document.getElementById('message');
+            btn.innerText = 'Uploading...';
+            btn.disabled = true;
 
-    // মেসেজ দেখানোর ফাংশন
-    function showMessage(text, isError = false) {
-        messageDiv.className = `alert ${isError ? 'error' : 'success'}`;
-        messageDiv.innerHTML = text;
-        messageDiv.classList.remove('hidden');
-    }
-
-    // লগইন ফর্ম হ্যান্ডলার
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-
-        try {
-            const res = await fetch('/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
-            });
-            const data = await res.json();
-
-            if (res.ok) {
-                currentUser = data.user;
-                document.getElementById('user-display').innerText = currentUser.username;
-                authSection.classList.add('hidden');
-                uploadSection.classList.remove('hidden');
-                showMessage(data.message);
-            } else {
-                showMessage(data.error, true);
+            try {
+                const res = await fetch('/upload', { method: 'POST', body: formData });
+                const data = await res.json();
+                if (res.ok) {
+                    result.innerHTML = `Success! <br> <a href="${data.url}" target="_blank">Click to view your site</a>`;
+                    document.getElementById('uploadForm').reset();
+                } else {
+                    result.innerHTML = 'Upload failed.';
+                }
+            } catch (err) {
+                result.innerHTML = 'Error connecting.';
+            } finally {
+                btn.innerText = 'Upload & Host';
+                btn.disabled = false;
             }
-        } catch (err) {
-            showMessage('সার্ভারে সমস্যা হচ্ছে!', true);
-        }
-    });
-
-    // ফাইল আপলোড ফর্ম হ্যান্ডলার
-    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const siteName = document.getElementById('siteName').value;
-        const fileInput = document.getElementById('htmlFile');
-
-        const formData = new FormData();
-        formData.append('userId', currentUser.id);
-        formData.append('siteName', siteName);
-        formData.append('htmlFile', fileInput.files[0]);
-
-        try {
-            const res = await fetch('/api/upload', {
-                method: 'POST',
-                body: formData
-            });
-            const data = await res.json();
-
-            if (res.ok) {
-                const fullUrl = window.location.origin + data.url;
-                showMessage(`আপনার সাইট লাইভ হয়ে গেছে! <br> লিঙ্ক: <a href="${fullUrl}" target="_blank">${fullUrl}</a>`);
-                document.getElementById('uploadForm').reset();
-            } else {
-                showMessage(data.error, true);
-            }
-        } catch (err) {
-            showMessage('আপলোড করা সম্ভব হয়নি!', true);
-        }
-    });
-
-    function logout() {
-        currentUser = null;
-        authSection.classList.remove('hidden');
-        uploadSection.classList.add('hidden');
-        messageDiv.classList.add('hidden');
-    }
-</script>
-
+        });
+    </script>
 </body>
 </html>
